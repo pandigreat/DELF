@@ -8,7 +8,7 @@ import argparse
 from torch import nn
 from torch.autograd import Variable 
 import  torchvision.models as imgnet_models
-from utils import *
+from src.utils import *
 
 '''
     The function to get hyper-params from the scripts
