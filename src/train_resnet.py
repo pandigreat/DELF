@@ -37,8 +37,8 @@ def get_args():
     args = parser.parse_args()
     return args
  
-def make_model(nclasses):
-    resnet50 = imgnet_models.resnet50(pretrained=True)
+def make_model(nclasses, trained=True):
+    resnet50 = imgnet_models.resnet50(pretrained=trained)
     for param in resnet50.parameters():
         param.requires_grad = True
     
@@ -171,8 +171,8 @@ if __name__ == '__main__':
             lr *= args.gamma
             logger('Iter [%d / %d] lr -> %.10f' %(iters, args.iters, lr))
 	    
-        for param_group in optimizer.param_groups:
-	        param_group['lr'] = lr
+            for param_group in optimizer.param_groups:
+	            param_group['lr'] = lr
 
 
 
