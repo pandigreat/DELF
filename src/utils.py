@@ -95,6 +95,12 @@ def load_test_img(data_addr, offset, size):
             pass
 
     return zip(images, labels)
+def getIgnore(data, files='./fileter.txt'):
+    fp = open(files, 'w')
+    try:
+        fp.write(next(data)+'\n')
+    except:
+        print('getIngnore')
 
 '''
     Generator of batch data
@@ -129,8 +135,8 @@ def Crop_data(data, crop_size, crop_num, size):
 	        crop_data.append((img, label))
 
     return crop_data
-    
-	
+def Crop_data_mul(data, crop_size, crop_num, size):
+    pass
 def shuffle_data(data):
     return random.shuffle(data)
 

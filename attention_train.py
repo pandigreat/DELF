@@ -26,8 +26,8 @@ class BasicAttentionBlock(nn.Module):
         
         self.feature.append(x.view(x.size(0), 2048, -1))
         feat = x
-        att_feat = F.normalize(feat, p=2,dim=0)
-
+        #att_feat = F.normalize(feat, p=2,dim=0)
+        att_feat = feat
         out = self.conv1(x)
         out = self.activate(out)
         out = self.conv2(out)
@@ -71,7 +71,7 @@ def make_model_with_attention(nclasses, model_addr):
     
     for para in model.avgpool.parameters():
         para.requires_grad = True
-    for para in model.avgpool.parameters():
+    for para in model.fc.parameters():
         para.requires_grad = True
 
     return model
@@ -86,14 +86,15 @@ if __name__ == '__main__':
     logger('start train attention, batch_size :%d ' %(arg.batch_size))
     logger('Set image resize size')
     resize_size = (900, 900)
-    crop_size = (720, 720)
-
+    #crop_size = (720, 720)
+    crop_size = (224, 224)
     logger('loading train data, data size:' )
     train_data = list(load_train_img(arg.train_data, arg.offset, resize_size))
 
     logger('Loading test data, data size:')
     test_data = list(load_test_img(arg.test_data, arg.offset, resize_size))
-
+    
+    logger('Test data size: %d, Train Data size: %d'%(len(train_data), len(test_data)))
     logger('Croping data...')
     train_data = Crop_data(train_data, crop_size, 3, resize_size)
     test_data = Crop_data(test_data, crop_size, 3, resize_size)
@@ -105,11 +106,17 @@ if __name__ == '__main__':
 
     logger('Loading model ')
     model = make_model_with_attention(nclasses=arg.n_classes,model_addr=arg.model)
-    model.cuda()
+    if torch.cuda.device_count() > 1:
+        nn.DataParallel(model).cuda()
+        logger('gpu num: %d'%(torch.cuda.device_count()))
+    else:
+        model.cuda()
 
     criterion = nn.CrossEntropyLoss()
     #optimizer = torch.optim.SGD(model.parameters(), lr=arg.lr, momentum=0.8)
     optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad, model.parameters()),lr=arg.lr, momentum=0.8)
+    a = filter(lambda p:p.requires_grad, model.parameters())  
+    getIgnore(a)
     model.train()
     logger("Start training ")
 
@@ -153,7 +160,8 @@ if __name__ == '__main__':
                 zip_test_data = test_data[n_test_id:n_test_id+arg.test_batch_size]
             else:
                 shuffle_data(test_data)
-                zip_test_data = test_dtat[n_test_id:n_test_id+arg.test_batch_size]
+                n_test_id = 0
+                zip_test_data = test_data[n_test_id:n_test_id+arg.test_batch_size]
             n_test_id += arg.test_batch_size
 
             image_test, label_test = zip(*zip_test_data)
