@@ -2,7 +2,7 @@
 touch log/logresnet50.log
 log='log/resnet50.log'
 
-python ./train_resnet.py   --train_data ./data/train_resnet50.txt \
+python ./src/train_resnet.py   --train_data ./data/train_resnet50.txt \
                              --test_data ./data/test_resnet50.txt \
                              --model ./model/   \
                              --n_classes 17 \
